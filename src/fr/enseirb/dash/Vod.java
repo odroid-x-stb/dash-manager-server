@@ -27,12 +27,12 @@ public class Vod extends HttpServlet {
 		File[] mpd_list = mpd_folder.listFiles();
 		String fileName = new String();
 		String movieName = new String();
-		System.out.print(mpd_list);
-		for(int i=0;i<mpd_list.length;i++){ 
+		for(int i=0;i<mpd_list.length;i++){
 			if(mpd_list[i].isFile() && isMpd(mpd_list[i].getName())){
 				fileName = mpd_list[i].getName();
-				movieName.substring(0,movieName.length()-4);
-				out.println("<movie link=\"".concat(fileName).concat("\">".concat(movieName).concat("<\\movie>")));
+				movieName = fileName.substring(0,fileName.length()-4);
+				out.println("<movie link=\"".concat(fileName).concat("\">".concat(movieName).concat("</movie>")));
+				System.out.println("<movie link=\"".concat(fileName).concat("\">".concat(movieName).concat("</movie>")));
 			} 
 		}
 		out.println("</vod>");
@@ -44,8 +44,9 @@ public class Vod extends HttpServlet {
 	public static boolean isMpd(String fileName) {
 		int posPoint = fileName.lastIndexOf('.');
 		if (0 < posPoint && posPoint <= fileName.length() - 2) {
-			fileName.substring(posPoint + 1);
-			if(fileName =="mpd"){
+			fileName = fileName.substring(posPoint + 1);
+			
+			if(fileName.equals("mpd")){
 				return true;
 			}
 		}

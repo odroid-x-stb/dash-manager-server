@@ -32,4 +32,15 @@
 		<servlet-name>Tnt</servlet-name>
 		<url-pattern>/tnt</url-pattern>
 	</servlet-mapping>
+	
+	
+		<servlet>
+		<servlet-name>Vod</servlet-name>
+		<servlet-class>fr.enseirb.dash.Vod</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Vod</servlet-name>
+		<url-pattern>/vod</url-pattern>
+	</servlet-mapping>
 </web-app>
