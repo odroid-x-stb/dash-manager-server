@@ -7,20 +7,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.*;
 
 public class UploadThread extends Thread {
 
+	protected static Logger logger = Logger.getLogger("log.uploadthread");
+	private int PORT = 5088;
+	private String folderPATH = "/var/www/uploads/";
+	private String SCRIPT = "/var/dash/vodDash.sh ";
 	private String fileName;
-
+	
 	public UploadThread(String fileName) {
 		this.fileName = fileName;
+		
+		Handler fh = null;
+		try {
+			fh = new FileHandler("myLog.log");
+		} catch (SecurityException e) {
+			System.out.println("Logging loading failed");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Logging loading failed");
+			e.printStackTrace();
+		}
+		logger.addHandler(fh);
 	}
 
 	public void run() {
-
-		System.out.println("Initializing");
+		logger.log(Level.INFO, "Initializing");
 		int read = 0;
 		ServerSocket serveur = null;
 		Socket serviceSocket = null;
@@ -28,15 +45,16 @@ public class UploadThread extends Thread {
 		InputStream input = null;
 
 		try {
-			System.out.println("Creating :" + fileName);
-			out = new FileOutputStream("/home/sopwith/android/" + fileName);
+			logger.log(Level.INFO, "Creating :" + fileName);
+			out = new FileOutputStream(folderPATH + fileName);
 		} catch (FileNotFoundException e1) {
+			logger.log(Level.INFO, "Failed to create :" + fileName);
 			e1.printStackTrace();
 		}
 		try {
-			System.out.println("Opening Socket");
+			logger.log(Level.INFO, "Opening Socket");
 
-			serveur = new ServerSocket(5088);
+			serveur = new ServerSocket(PORT);
 			serviceSocket = serveur.accept();
 			input = serviceSocket.getInputStream();
 
@@ -45,7 +63,7 @@ public class UploadThread extends Thread {
 
 			// Reçoit du client
 			read = inBuffer.read();
-			System.out.println("Receiving");
+			logger.log(Level.INFO, "Receiving");
 			while (read > -1) {
 				outBuffer.write(read);
 				read = inBuffer.read();
@@ -53,7 +71,10 @@ public class UploadThread extends Thread {
 			outBuffer.write(read);
 
 			outBuffer.flush();
-			System.out.println("File received");
+			logger.log(Level.INFO, "File received");
+			Runtime runtime = Runtime.getRuntime();
+			// runtime.exec(SCRIPT.concat(folderPATH).concat(fileName));
+
 			outBuffer.close();
 			inBuffer.close();
 			serveur.close();
@@ -61,9 +82,9 @@ public class UploadThread extends Thread {
 			out.close();
 			input.close();
 			serviceSocket.close();
+		} catch (BindException e) {
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
