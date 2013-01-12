@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.corba.se.spi.activation.Server;
-
 public class Vod extends HttpServlet {
 	protected static Logger logger = Logger.getLogger("log.uploadthread");
 	String HTTP_SERVER_PATH = "/var/www/";
