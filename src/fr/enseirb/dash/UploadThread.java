@@ -11,14 +11,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.BindException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.FileHandler;
@@ -29,16 +24,14 @@ import java.util.logging.Logger;
 public class UploadThread extends Thread {
 
 	protected static Logger logger = Logger.getLogger("log.uploadthread");
-	private final static int PORT = 5088;
-	private final static String folderPATH = "/var/www/uploads/"; 
-	//espace pour la ligne de commande
-	private final static String SCRIPT = "/var/dash/amine/Debug/amineDASH ";
+	private int PORT = 5088;
+	private String folderPATH = "/var/www/uploads/";
+	private String SCRIPT = "/var/dash/vodDash.sh ";
 	private String fileName;
-	String ip_server = null;
 
 	public UploadThread(String fileName) {
 		this.fileName = fileName;
-		ip_server = getIP();
+
 		Handler fh = null;
 		try {
 			fh = new FileHandler("myLog.log");
@@ -68,7 +61,6 @@ public class UploadThread extends Thread {
 			e1.printStackTrace();
 		}
 		try {
-			// Ouverture de socket
 			serveur = new ServerSocket(PORT);
 			serviceSocket = serveur.accept();
 			logger.log(Level.INFO, "Opening Socket");
@@ -89,26 +81,12 @@ public class UploadThread extends Thread {
 			outBuffer.flush();
 			logger.log(Level.INFO, "File received");
 			Runtime runtime = Runtime.getRuntime();
-
-			// Lancement du script
-
 			logger.log(Level.INFO, "Lauching script");
-			// String [] cmdArgs = { "/bin/sh", "-c",
-			// SCRIPT.concat(folderPATH).concat(fileName).concat("> file.txt")
-			// }; // Very important to keep the first 2 args.
-			logger.log(Level.INFO, fileName);
+			//runtime.exec(SCRIPT.concat(folderPATH).concat(fileName));
+			//execScript();
+			String [] cmdArgs = { "/bin/sh", "-c", SCRIPT.concat(folderPATH).concat(fileName).concat("> file.txt") }; // Very important to keep the first 2 args.
 
-			String cmd = SCRIPT.concat("http://")
-					.concat(ip_server).concat("/VOD/")
-					.concat(" ")
-					.concat(folderPATH)
-					.concat(" ")
-					.concat(fileName.substring(0, fileName.lastIndexOf("."))
-					.concat(" ")
-					.concat(fileName.substring(fileName.lastIndexOf(".")))
-					.concat(" > file.txt"));
-			logger.log(Level.INFO, cmd);
-			Process child = Runtime.getRuntime().exec(cmd);
+			Process child = Runtime.getRuntime().exec(cmdArgs);
 			try {
 				child.waitFor();
 			} catch (InterruptedException e) {
@@ -132,24 +110,38 @@ public class UploadThread extends Thread {
 		}
 	}
 
-	public String getIP() {
-		Enumeration<NetworkInterface> interfaces = null;
+	public void execScript(){
 		try {
-			interfaces = NetworkInterface.getNetworkInterfaces();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		while (interfaces.hasMoreElements() && interfaces != null) {
-			NetworkInterface current = interfaces.nextElement();
-			Enumeration<InetAddress> addresses = current.getInetAddresses();
-			while (addresses.hasMoreElements()) {
-				InetAddress current_addr = addresses.nextElement();
-				if (current_addr.isLoopbackAddress())
-					continue;
-				if (current_addr instanceof Inet4Address)
-					ip_server = current_addr.getHostAddress();
+			FileWriter outputfile = new FileWriter("toto.log", true); 
+			PrintWriter log = new PrintWriter (outputfile);
+			log.println (" string4");
+
+			//	Runtime.getRuntime().exec("./doit3");
+
+			ProcessBuilder pb = new ProcessBuilder("vodDash.sh");
+
+			Map<String, String> env = pb.environment();
+
+			// set up the working directory.
+			pb.directory( new File( "/var/dash/" ) );
+
+			// merge child's error and normal output streams.
+			pb.redirectErrorStream( true );
+
+			// Print out ProcessBuilder Information
+			List<String> pblist = new ArrayList<String> ();
+			pblist = pb.command ();
+			log.println ("ProcessBuilder object contains:");
+			for (String cmd : pblist) {
+				log.println (cmd);
 			}
-		}
-		return ip_server;
+			log.println ("Before pb.start");
+			Process p = pb.start();		
+			log.println ("After pb.start");
+			log.close ();
+
+		} catch (IOException e) {	
+			e.printStackTrace();		
+		} 
 	}
 }
