@@ -51,7 +51,7 @@ public class Tnt extends HttpServlet {
 		} else {
 			logger.log(Level.INFO, "Request channel :" + channel);
 			Runtime runtime = Runtime.getRuntime();
-			logger.log(Level.INFO, "Starting VOD script");
+			logger.log(Level.INFO, "Starting TNT script");
 			String tntPath = ip_server.concat(":").concat(PORT);
 			runtime.exec(SCRIPT
 					.concat(channel)
